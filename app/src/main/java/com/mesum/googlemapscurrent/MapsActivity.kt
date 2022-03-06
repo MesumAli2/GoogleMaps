@@ -1,7 +1,9 @@
 package com.mesum.googlemapscurrent
 
+import android.content.res.Resources
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 
@@ -10,13 +12,16 @@ import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.MapStyleOptions
 import com.google.android.gms.maps.model.MarkerOptions
 import com.mesum.googlemapscurrent.databinding.ActivityMapsBinding
+import java.util.*
 
 class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
     private lateinit var mMap: GoogleMap
     private lateinit var binding: ActivityMapsBinding
+    private val TAG = MapsActivity::class.java.simpleName
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -48,6 +53,8 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         mMap.addMarker(MarkerOptions().position(dubai).title("UAE"))
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(dubai, zoomLevel))
         setMapLongClick(mMap)
+        setPoiClick(mMap)
+        setMapStyle(mMap)
 
     }
 
@@ -83,10 +90,46 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
     }
     private fun setMapLongClick(map: GoogleMap) {
         map.setOnMapLongClickListener { latLng ->
+            // A snippet is additional text that's displayed after the title.
+            val snippet = String.format(
+                Locale.getDefault(),
+                "Lat: %1$.5f, Long: %2$.5f",
+                latLng.latitude,
+                latLng.longitude
+
+                )
             map.addMarker(
                 MarkerOptions()
                     .position(latLng)
+                    .title(getString(R.string.dropped_pin))
+                    .snippet(snippet)
             )
+        }
+    }
+    private fun setPoiClick(map: GoogleMap){
+        map.setOnPoiClickListener { poi ->
+            val poiMarker = map.addMarker(
+                MarkerOptions().position(poi.latLng)
+                    .title(poi.name)
+
+            )
+            poiMarker.showInfoWindow()
+        }
+    }
+    private fun setMapStyle(map: GoogleMap){
+        try {
+            val success = map.setMapStyle(
+                MapStyleOptions.loadRawResourceStyle(
+                    this,
+                    R.raw.map_style
+                )
+            )
+            if (!success){
+                Log.d(TAG, "Cannot parse Style :Style Parsing Failed")
+            }
+
+        }catch (E: Resources.NotFoundException){
+                Log.d(TAG, "Can't find Style. Error: ", E)
         }
     }
 }
