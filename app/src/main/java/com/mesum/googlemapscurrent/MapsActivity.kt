@@ -1,11 +1,14 @@
 package com.mesum.googlemapscurrent
 
+import android.content.pm.PackageManager
 import android.content.res.Resources
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
@@ -14,12 +17,15 @@ import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.*
 import com.mesum.googlemapscurrent.databinding.ActivityMapsBinding
 import java.util.*
+import java.util.jar.Manifest
 
 class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
     private lateinit var mMap: GoogleMap
     private lateinit var binding: ActivityMapsBinding
     private val TAG = MapsActivity::class.java.simpleName
+    private val REQUEST_LOCATION_PERMISSION = 1
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -45,19 +51,21 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
     override fun onMapReady(googleMap: GoogleMap) {
         mMap = googleMap
 
-        // Add a marker in Sydney and move the camera
+        // Add a marker in dubai and move the camera
         val dubai = LatLng(25.2048, 55.2708)
         val zoomLevel = 18f
-        mMap.addMarker(MarkerOptions().position(dubai).title("UAE"))
+        mMap.addMarker(MarkerOptions().position(dubai).title("Dubai"))
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(dubai, zoomLevel))
         val overLaySize = 100f
         val androidOverlay = GroundOverlayOptions()
-            .image(BitmapDescriptorFactory.fromResource(R.drawable.android))
+            .image(BitmapDescriptorFactory.fromResource(R.drawable.androidpink))
             .position(dubai, overLaySize)
         mMap.addGroundOverlay(androidOverlay)
+
         setMapLongClick(mMap)
         setPoiClick(mMap)
         setMapStyle(mMap)
+        enableMyLocation()
 
     }
 
@@ -136,4 +144,35 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
                 Log.d(TAG, "Can't find Style. Error: ", E)
         }
     }
+
+    private fun isPermissionGranted(): Boolean{
+        return ContextCompat.checkSelfPermission(
+            this, android.Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
+    }
+    private fun enableMyLocation() {
+        if (isPermissionGranted()) {
+            mMap.isMyLocationEnabled = true
+        }
+        else {
+          ActivityCompat.requestPermissions(
+              this,
+              arrayOf<String>(android.Manifest.permission.ACCESS_FINE_LOCATION),
+              REQUEST_LOCATION_PERMISSION
+          )
+        }
+    }
+
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<String>,
+        grantResults: IntArray) {
+        if (requestCode == REQUEST_LOCATION_PERMISSION) {
+            if (grantResults.contains(PackageManager.PERMISSION_GRANTED)) {
+                enableMyLocation()
+            }
+        }
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+
+    }
+
 }
