@@ -16,17 +16,17 @@ import com.mesum.googlemapscurrent.databinding.ActivityMapsBinding
 class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
     private lateinit var mMap: GoogleMap
-private lateinit var binding: ActivityMapsBinding
+    private lateinit var binding: ActivityMapsBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-     binding = ActivityMapsBinding.inflate(layoutInflater)
-     setContentView(binding.root)
+        binding = ActivityMapsBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         val mapFragment = supportFragmentManager
-                .findFragmentById(R.id.map) as SupportMapFragment
+            .findFragmentById(R.id.map) as SupportMapFragment
         mapFragment.getMapAsync(this)
     }
 
@@ -47,6 +47,8 @@ private lateinit var binding: ActivityMapsBinding
         val zoomLevel = 10f
         mMap.addMarker(MarkerOptions().position(dubai).title("UAE"))
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(dubai, zoomLevel))
+        setMapLongClick(mMap)
+
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
@@ -77,6 +79,14 @@ private lateinit var binding: ActivityMapsBinding
             }
         }
         return true
-        
+
+    }
+    private fun setMapLongClick(map: GoogleMap) {
+        map.setOnMapLongClickListener { latLng ->
+            map.addMarker(
+                MarkerOptions()
+                    .position(latLng)
+            )
+        }
     }
 }
