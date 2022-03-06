@@ -11,9 +11,7 @@ import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
-import com.google.android.gms.maps.model.LatLng
-import com.google.android.gms.maps.model.MapStyleOptions
-import com.google.android.gms.maps.model.MarkerOptions
+import com.google.android.gms.maps.model.*
 import com.mesum.googlemapscurrent.databinding.ActivityMapsBinding
 import java.util.*
 
@@ -49,9 +47,14 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
         // Add a marker in Sydney and move the camera
         val dubai = LatLng(25.2048, 55.2708)
-        val zoomLevel = 10f
+        val zoomLevel = 18f
         mMap.addMarker(MarkerOptions().position(dubai).title("UAE"))
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(dubai, zoomLevel))
+        val overLaySize = 100f
+        val androidOverlay = GroundOverlayOptions()
+            .image(BitmapDescriptorFactory.fromResource(R.drawable.android))
+            .position(dubai, overLaySize)
+        mMap.addGroundOverlay(androidOverlay)
         setMapLongClick(mMap)
         setPoiClick(mMap)
         setMapStyle(mMap)
@@ -103,6 +106,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
                     .position(latLng)
                     .title(getString(R.string.dropped_pin))
                     .snippet(snippet)
+                    .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_ORANGE))
             )
         }
     }
